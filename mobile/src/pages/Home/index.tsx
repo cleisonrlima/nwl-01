@@ -1,19 +1,69 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { Feather as Icon } from '@expo/vector-icons';
-import { View, ImageBackground, Text, StyleSheet, Image, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, ImageBackground, Text, StyleSheet, Image, TextInput, KeyboardAvoidingView, Platform, Alert, Animated } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
-
+import axios from 'axios';
+import * as Location from 'expo-location';
 import { useNavigation } from '@react-navigation/native'
 
 // react-native-picker-select
+
+interface CepData{
+    localidade: string,
+    uf: string
+}
 
 const Home = () => {
     const navigation = useNavigation();
     const [uf, setUf] = useState('');
     const [city, setCity] = useState('');
+    
     function handleNavigation() {
-        navigation.navigate('Points', {uf,city});
+        navigation.navigate('Points', { uf, city });
     }
+
+    const [fadeAnim] = useState(new Animated.Value(0)); // Initial value for opacity: 0
+
+    React.useEffect(() => {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 5000,
+        useNativeDriver: true
+      }).start();
+    }, []);
+
+   
+
+    useEffect(() => {
+        async function loadPosition() {
+
+            const { status } = await Location.requestPermissionsAsync();
+        
+            if (status !== 'granted') {
+                Alert.alert('Oppss..', 'Precisamos de sua permissão para obter a localizacao');
+                return;
+            }
+
+            const location = await Location.getCurrentPositionAsync();
+            const { latitude, longitude } = location.coords;
+
+            const locationAdress = await Location.reverseGeocodeAsync({ latitude, longitude });
+            const postCode = locationAdress[0].postalCode;
+
+            if(locationAdress[0].postalCode){
+
+                const response = await axios.get<CepData>(`https://viacep.com.br/ws/${postCode}/json/`);
+                if(response.data){
+                    const {localidade, uf} = response.data;
+                    setUf(uf);
+                    setCity(localidade);
+                }
+            }
+
+        }
+        loadPosition();
+
+    }, []);
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <ImageBackground
@@ -29,7 +79,7 @@ const Home = () => {
                     </View>
                 </View>
 
-                <View style={styles.footer}>
+                <Animated.View style={{...styles.footer, opacity: fadeAnim,}}>
                     <TextInput
                         style={styles.input}
                         placeholder="Digite a UF"
@@ -57,7 +107,7 @@ const Home = () => {
                             Entrar
                         </Text>
                     </RectButton>
-                </View>
+                </Animated.View>
             </ImageBackground>
         </KeyboardAvoidingView>
     )

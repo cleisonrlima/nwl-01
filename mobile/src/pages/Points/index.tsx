@@ -47,14 +47,21 @@ const Points = () => {
     useEffect(() => {
         async function loadPosition() {
             const { status } = await Location.requestPermissionsAsync();
-
+            Location.reverseGeocodeAsync
             if (status !== 'granted') {
                 Alert.alert('Oppss..', 'Precisamos de sua permissão para obter a localizacao');
                 return;
             }
 
+
             const location = await Location.getCurrentPositionAsync();
             const { latitude, longitude } = location.coords;
+
+
+            const locationAdress = await Location.reverseGeocodeAsync({ latitude, longitude });
+
+            locationAdress.map(loc => loc.city);
+
 
             setInitialPosition([
                 latitude,
@@ -79,7 +86,7 @@ const Points = () => {
             }
         }).then(res => {
             setPoints(res.data);
-            console.log(res.data);
+
         })
     }, [itemsSetected]);
 
@@ -89,7 +96,7 @@ const Points = () => {
 
     function handleNavigateDetail(id: number) {
 
-        navigation.navigate('Detail', {point_id: id});
+        navigation.navigate('Detail', { point_id: id });
     }
 
     function handleItemsSelected(id: number) {

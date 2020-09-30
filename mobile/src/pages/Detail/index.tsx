@@ -45,14 +45,14 @@ const Detail = () => {
         navigation.goBack();
     }
 
-    function handleMailCompose(){
+    function handleMailCompose() {
         MailComposer.composeAsync({
             subject: 'Interesse na coleta de resíduos',
             recipients: [data.point.email],
         })
     }
 
-    function handleWhatsapp(){
+    function handleWhatsapp() {
         Linking.openURL(`whatsapp://send?phone=55${data.point.whatsapp}&text=Tenho interesse sobre coleta de resíduos`);
     }
 
@@ -60,7 +60,7 @@ const Detail = () => {
         return null;
     }
     return (
-        <SafeAreaView style={{ flex: 1,  }}>
+        <SafeAreaView style={{ flex: 1, }}>
             <View style={Platform.OS == 'android' ? styles.containerAndroid : styles.container}>
                 <TouchableOpacity onPress={handleNavigateBack}>
                     <Icon name="arrow-left" size={20} color="#34cb79" />
@@ -75,9 +75,8 @@ const Detail = () => {
 
                 <View style={styles.address}>
                     <Text style={styles.addressTitle}>Endereco</Text>
-    <Text style={styles.addressContent}>{data.point.city}, {data.point.uf}</Text>
+                    <Text style={styles.addressContent}>{data.point.city}, {data.point.uf}</Text>
                 </View>
-
             </View>
 
             <View style={styles.footer}>
